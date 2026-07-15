@@ -1,0 +1,29 @@
+name: Player report
+
+on:
+  workflow_dispatch:
+    inputs:
+      player_tag:
+        description: 'Player tag (with or without #), e.g. COOCRGG2P'
+        required: true
+        type: string
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate report
+        env:
+          CR_API_KEY: ${{ secrets.CR_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python report.py "${{ inputs.player_tag }}"

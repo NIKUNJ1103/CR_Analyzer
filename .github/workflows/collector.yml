@@ -1,0 +1,27 @@
+name: Collect player battles
+
+on:
+  schedule:
+    - cron: '0 6,14,22 * * *'   # 3x/day, UTC
+  workflow_dispatch: {}
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch battles for every player in the pool
+        env:
+          CR_API_KEY: ${{ secrets.CR_API_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          MAX_WORKERS: '15'   # lower this if logs show 429 (rate limited) entries climbing
+        run: python collector.py
